@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GMed - Register Account</title>
+    <link rel="stylesheet" href="login-style.css"> <!-- Gamiton ra ang karaan nga style para uniporme -->
+</head>
+<body>
+
+    <div class="login-container">
+        <h2>Create GMed Account</h2>
+        <form id="register-form">
+            <div class="input-group">
+                <input type="text" id="reg-name" placeholder="Full Name" required>
+            </div>
+            <div class="input-group">
+                <input type="email" id="reg-email" placeholder="Email Address" required>
+            </div>
+            <div class="input-group">
+                <input type="password" id="reg-password" placeholder="Password (min 6 chars)" required>
+            </div>
+            <button type="submit" class="login-btn">Sign Up</button>
+        </form>
+        <p class="signup-link">Naa na kay account? <a href="login.html">Log In diri</a></p>
+    </div>
+
+    <!-- KINI NGA SCRIPT ANG MO-SAVE SA FIREBASE -->
+    <script type="module">
+        import { auth, db, createUserWithEmailAndPassword, doc, setDoc } from "./firebase-config.js";
+
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('reg-name').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-password').value;
+
+            try {
+                // 1. I-create ang user sa Firebase Authentication
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // 2. I-save ang iyang Full Name sa Firestore Database
+                await setDoc(doc(db, "users", user.uid), {
+                    fullName: name,
+                    email: email,
+                    createdAt: new Date().toISOString()
+                });
+
+                alert("Malampuson ang pag-create sa imong account!");
+                window.location.href = "login.html"; // Ibalhin siya sa login screen
+
+            } catch (error) {
+                console.error(error);
+                alert("Sayop: " + error.message);
+            }
+        });
+    </script>
+
+</body>
+</html>
