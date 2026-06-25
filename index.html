@@ -3,112 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GMed - News Feed</title>
-    <link rel="stylesheet" href="style.css">
-
-    <!-- KINI NGA SCRIPT ANG MO-AUTOMATIC PAADTO SA LOGIN PAGE -->
-    <script>
-        // Kung ang user dretso niabli sa link ug wala gikan sa login page, ipasa sa login.html
-        if (!document.referrer.includes('login.html')) {
-            window.location.href = 'login.html';
+    <title>GMed - Home Dashboard</title>
+    <!-- Mahimo nimong usbon o isumpay ang imong karaan nga CSS file diri -->
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f6f9;
         }
-    </script>
+        nav {
+            background-color: #007bff;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        nav h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .user-name {
+            font-weight: bold;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
+        .main-content {
+            padding: 40px 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .welcome-card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+    </style>
 </head>
 <body>
 
-    <!-- 1. NAVBAR SECTION -->
-    <nav class="navbar">
-        <div class="nav-left">
-            <h2 class="logo">GMed</h2>
-        </div>
-        <div class="nav-right">
-            <button class="logout-btn" onclick="window.location.href='login.html'">Logout</button>
+    <!-- NAVBAR AREA -->
+    <nav>
+        <h1>GMed Portal</h1>
+        <div class="nav-links">
+            <!-- Dinhi mogawas ang ngalan sa user kung ma-load na gikan sa Firestore -->
+            <span class="user-name" id="user-display-name">Loading user...</span>
+            <button class="logout-btn" id="logout-btn">Log Out</button>
         </div>
     </nav>
 
-    <!-- 2. MAIN CONTAINER -->
-    <div class="main-container">
-        
-        <!-- SIDEBAR (WALA) -->
-        <aside class="sidebar-left">
-            <div class="profile-card">
-                <h3>Welcome back!</h3>
-            </div>
-        </aside>
-
-        <!-- FEED SECTION (TUNGA) -->
-        <main class="feed-section">
-            
-            <!-- STORIES BAR -->
-            <div class="stories-container">
-                <div class="story-card add-story">
-                    <p>+</p>
-                    <span>Create Story</span>
-                </div>
-                <div class="story-card"><span>Friend 1</span></div>
-                <div class="story-card"><span>Friend 2</span></div>
-                <div class="story-card"><span>Friend 3</span></div>
-            </div>
-
-            <!-- CREATE POST BOX -->
-            <div class="create-post-box">
-                <textarea id="post-input" placeholder="What's on your mind?"></textarea>
-                <button id="post-btn">Post</button>
-            </div>
-
-            <!-- POSTS FEED -->
-            <div id="posts-container">
-                <!-- Dinhi mosulod ang mga posts gikan sa JavaScript -->
-                <div class="post">
-                    <h4>Sample User</h4>
-                    <p>Welcome to GMed! This is a sample post.</p>
-                </div>
-            </div>
-
-        </main>
-
-        <!-- SIDEBAR (TUO) -->
-        <aside class="sidebar-right">
-            <div class="contacts-card">
-                <h3>Contacts</h3>
-                <ul>
-                    <li>Active Friend 1</li>
-                    <li>Active Friend 2</li>
-                </ul>
-            </div>
-        </aside>
-
+    <!-- MAIN CONTENT AREA -->
+    <div class="main-content">
+        <div class="welcome-card">
+            <h2>Welcome sa Imong Dashboard</h2>
+            <p>Kini nga page protektado na sa Firebase Authentication. Kung naay mosulay og sud nga wala naka-login, i-redirect sila og balik sa login screen.</p>
+        </div>
     </div>
 
-    <!-- JAVASCRIPT PARA SA POSTING UG STORIES FUNCTIONALITY -->
-    <script>
-        const postBtn = document.getElementById('post-btn');
-        const postInput = document.getElementById('post-input');
-        const postsContainer = document.getElementById('posts-container');
+    <!-- ======================================================== -->
+    <!-- FIREBASE SECURITY UG LOGOUT SCRIPT -->
+    <!-- ======================================================== -->
+    <script type="module">
+        import { auth, db, onAuthStateChanged, signOut, doc, getDoc } from "./firebase-config.js";
 
-        // Function para mag-add og post
-        postBtn.addEventListener('click', function() {
-            const postText = postInput.value.trim();
-            
-            if (postText === "") {
-                alert("Palihog pagsulat og mensahe sa dili pa mo-post!");
-                return;
+        // 1. Susiha ang status sa user (Naka-login ba o wala)
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                console.log("Naka-login ang user:", user.email);
+                
+                try {
+                    // Kuhaon ang tinuod nga Full Name sa user gikan sa Firestore Database
+                    const docRef = doc(db, "users", user.uid);
+                    const docSnap = await getDoc(docRef);
+                    
+                    if (docSnap.exists()) {
+                        const userData = docSnap.data();
+                        // Ibutang ang ngalan sa user didto sa navbar
+                        document.getElementById('user-display-name').innerText = userData.fullName;
+                    } else {
+                        // Kung walay ngalan sa database, email lang ang ipakita
+                        document.getElementById('user-display-name').innerText = user.email;
+                    }
+                } catch (error) {
+                    console.error("Sipyat sa pagkuha sa user data:", error);
+                    document.getElementById('user-display-name').innerText = user.email;
+                }
+
+            } else {
+                // Kung KINSA MAN ang mosulay og sud nga WALAY account, i-kick out dretso sa login page
+                console.log("Walay user nga naka-login. I-redirect sa login.html...");
+                window.location.href = "login.html";
             }
-
-            // Paghimo og bag-ong post element
-            const newPost = document.createElement('div');
-            newPost.classList.add('post');
-            newPost.innerHTML = `
-                <h4>You</h4>
-                <p>${postText}</p>
-            `;
-
-            // Ibutang sa pinaka-ibabaw sa feed ang bag-ong post
-            postsContainer.insertBefore(newPost, postsContainer.firstChild);
-
-            // I-clear ang text area
-            postInput.value = "";
         });
+
+        // 2. Pagana sa Logout Button
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                signOut(auth).then(() => {
+                    console.log("Malampuson nga naka-logout.");
+                    window.location.href = "login.html";
+                }).catch((error) => {
+                    alert("Error sa pag-logout: " + error.message);
+                });
+            });
+        }
     </script>
 
 </body>
