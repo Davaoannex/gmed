@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GMed</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-left">
+            <h1 class="logo" style="cursor: pointer;" onclick="location.reload()">GMed</h1>
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Search GMed...">
+            </div>
+        </div>
+
+        <div class="nav-middle">
+            <a href="#" class="nav-icon active"><i class="fa-solid fa-house"></i></a>
+            <a href="#" class="nav-icon" onclick="alert('Friends page coming soon!')"><i class="fa-solid fa-users"></i></a>
+            <a href="#" class="nav-icon" onclick="alert('Videos page coming soon!')"><i class="fa-solid fa-video"></i></a>
+            <a href="#" class="nav-icon" onclick="alert('Marketplace coming soon!')"><i class="fa-solid fa-store"></i></a>
+        </div>
+
+        <div class="nav-right">
+            <button class="utility-btn" onclick="alert('Menu opened!')"><i class="fa-solid fa-bars"></i></button>
+            <button class="utility-btn" onclick="alert('Messenger opened!')"><i class="fa-solid fa-comment"></i></button>
+            <button class="utility-btn" onclick="alert('Notifications opened!')"><i class="fa-solid fa-bell"></i></button>
+            <div class="profile-avatar" onclick="alert('Profile settings!')"></div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        
+        <aside class="sidebar-left">
+            <div class="menu-item" onclick="alert('Opening your profile...')">
+                <div class="menu-icon profile-pic"></div>
+                <span>Your Profile</span>
+            </div>
+            <div class="menu-item" onclick="alert('Opening Friends list...')">
+                <i class="fa-solid fa-user-group color-blue"></i>
+                <span>Friends</span>
+            </div>
+            <div class="menu-item" onclick="alert('Opening Memories...')">
+                <i class="fa-solid fa-clock color-green"></i>
+                <span>Memories</span>
+            </div>
+            <div class="menu-item" onclick="alert('Opening Saved posts...')">
+                <i class="fa-solid fa-bookmark color-purple"></i>
+                <span>Saved</span>
+            </div>
+        </aside>
+
+        <main class="feed-center">
+            <div class="feed-container-box">
+                
+                <div class="stories-container">
+                    <div class="story-card active-user">
+                        <div class="story-bg-placeholder" style="background-color: #3a3b3c;"></div>
+                        <div class="create-story-btn"><i class="fa-solid fa-plus"></i></div>
+                        <span>Create Story</span>
+                    </div>
+                    <div class="story-card">
+                        <div class="story-avatar"></div>
+                        <div class="story-bg-placeholder" style="background-color: #4e4f50;"></div>
+                        <span>John Doe</span>
+                    </div>
+                    <div class="story-card">
+                        <div class="story-avatar"></div>
+                        <div class="story-bg-placeholder" style="background-color: #2d4258;"></div>
+                        <span>Jane Smith</span>
+                    </div>
+                </div>
+                
+                <div class="create-post-box">
+                    <div class="post-top">
+                        <div class="profile-avatar"></div>
+                        <input type="text" id="post-input" placeholder="What's on your mind, Racky?">
+                    </div>
+                    <div class="post-divider"></div>
+                    <div class="post-bottom">
+                        <div class="action-btn color-red" onclick="alert('Starting live video...')">
+                            <i class="fa-solid fa-video"></i>
+                            <span>Live video</span>
+                        </div>
+                        <div class="action-btn color-green" onclick="alert('Upload photo or video')">
+                            <i class="fa-solid fa-images"></i>
+                            <span>Photo/video</span>
+                        </div>
+                        <div class="action-btn color-yellow" onclick="alert('How are you feeling?')">
+                            <i class="fa-solid fa-face-smile"></i>
+                            <span>Feeling/activity</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="dynamic-posts-list">
+                    
+                    <div class="post-card">
+                        <div class="post-card-header">
+                            <div class="user-avatar" style="background-color: #e4e6eb;"></div>
+                            <div class="user-info">
+                                <h4>John Doe</h4>
+                                <span>1 hr ago · <i class="fa-solid fa-earth-americas"></i></span>
+                            </div>
+                            <button class="post-menu-btn" onclick="alert('Post options')"><i class="fa-solid fa-ellipsis"></i></button>
+                        </div>
+
+                        <div class="post-card-body">
+                            <p>Building the new GMed social media platform using HTML, CSS, and JavaScript! Exciting times ahead. 🚀🔥</p>
+                        </div>
+
+                        <div class="post-stats">
+                            <div class="likes-count">
+                                <i class="fa-solid fa-thumbs-up"></i>
+                                <span class="like-text-count">12 Likes</span>
+                            </div>
+                            <div class="comments-count">
+                                <span>0 comments</span>
+                            </div>
+                        </div>
+
+                        <div class="post-divider"></div>
+
+                        <div class="post-actions">
+                            <button class="action-trigger-btn like-btn">
+                                <i class="fa-regular fa-thumbs-up like-icon"></i>
+                                <span class="like-btn-label">Like</span>
+                            </button>
+                            <button class="action-trigger-btn comment-btn">
+                                <i class="fa-regular fa-comment"></i>
+                                <span>Comment</span>
+                            </button>
+                            <button class="action-trigger-btn share-btn">
+                                <i class="fa-regular fa-share-from-square"></i>
+                                <span>Share</span>
+                            </button>
+                        </div>
+
+                        <div class="comment-section" style="display: none; margin-top: 12px; border-top: 1px solid #3a3b3c; padding-top: 12px;">
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <div class="profile-avatar" style="width: 32px; height: 32px;"></div>
+                                <input type="text" placeholder="Write a comment..." style="flex: 1; background-color: #3a3b3c; border: none; padding: 8px 12px; border-radius: 20px; color: #fff; outline: none; font-size: 14px;">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </main>
+
+        <aside class="sidebar-right">
+            <h3 class="section-title">Contacts</h3>
+            <div class="contact-item" onclick="alert('Chat with Friend 1')">
+                <div class="contact-status online"></div>
+                <span>Friend 1</span>
+            </div>
+            <div class="contact-item" onclick="alert('Chat with Friend 2')">
+                <div class="contact-status online"></div>
+                <span>Friend 2</span>
+            </div>
+        </aside>
+
+    </div>
+
+    <script>
+        const postInput = document.getElementById('post-input');
+        const postsList = document.getElementById('dynamic-posts-list');
+
+        // Function para mo-andar ang Like ug Comment sa bisan unsa nga post (daan o bag-o)
+        function setupPostInteractions(postCard) {
+            const likeBtn = postCard.querySelector('.like-btn');
+            const likeIcon = postCard.querySelector('.like-icon');
+            const likeBtnLabel = postCard.querySelector('.like-btn-label');
+            const likeTextCount = postCard.querySelector('.like-text-count');
+            const commentBtn = postCard.querySelector('.comment-btn');
+            const commentSection = postCard.querySelector('.comment-section');
+            const shareBtn = postCard.querySelector('.share-btn');
+
+            let isLiked = false;
+            let count = parseInt(likeTextCount.innerText);
+
+            likeBtn.addEventListener('click', () => {
+                if (!isLiked) {
+                    likeIcon.className = "fa-solid fa-thumbs-up";
+                    likeBtn.style.color = '#2374e1';
+                    count++;
+                    isLiked = true;
+                } else {
+                    likeIcon.className = "fa-regular fa-thumbs-up";
+                    likeBtn.style.color = '#b0b3b8';
+                    count--;
+                    isLiked = false;
+                }
+                likeTextCount.innerText = count + " Likes";
+            });
+
+            commentBtn.addEventListener('click', () => {
+                commentSection.style.display = commentSection.style.display === 'none' ? 'block' : 'none';
+            });
+
+            shareBtn.addEventListener('click', () => {
+                alert('🚀 Post shared successfully to your timeline!');
+            });
+        }
+
+        // Setup the initial default post
+        document.querySelectorAll('.post-card').forEach(setupPostInteractions);
+
+        // CREATE NEW POST LOGIC (Press Enter to post)
+        postInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const text = postInput.value.trim();
+                if (text !== "") {
+                    // Mag-gama og bag-ong HTML element para sa bag-ong post
+                    const newPost = document.createElement('div');
+                    newPost.className = 'post-card';
+                    newPost.innerHTML = `
+                        <div class="post-card-header">
+                            <div class="user-avatar" style="background-color: #747679;"></div>
+                            <div class="user-info">
+                                <h4>Racky (You)</h4>
+                                <span>Just now · <i class="fa-solid fa-earth-americas"></i></span>
+                            </div>
+                            <button class="post-menu-btn"><i class="fa-solid fa-ellipsis"></i></button>
+                        </div>
+                        <div class="post-card-body">
+                            <p>${text}</p>
+                        </div>
+                        <div class="post-stats">
+                            <div class="likes-count">
+                                <i class="fa-solid fa-thumbs-up"></i>
+                                <span class="like-text-count">0 Likes</span>
+                            </div>
+                            <div class="comments-count">
+                                <span>0 comments</span>
+                            </div>
+                        </div>
+                        <div class="post-divider"></div>
+                        <div class="post-actions">
+                            <button class="action-trigger-btn like-btn">
+                                <i class="fa-regular fa-thumbs-up like-icon"></i>
+                                <span class="like-btn-label">Like</span>
+                            </button>
+                            <button class="action-trigger-btn comment-btn">
+                                <i class="fa-regular fa-comment"></i>
+                                <span>Comment</span>
+                            </button>
+                            <button class="action-trigger-btn share-btn">
+                                <i class="fa-regular fa-share-from-square"></i>
+                                <span>Share</span>
+                            </button>
+                        </div>
+                        <div class="comment-section" style="display: none; margin-top: 12px; border-top: 1px solid #3a3b3c; padding-top: 12px;">
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <div class="profile-avatar" style="width: 32px; height: 32px;"></div>
+                                <input type="text" placeholder="Write a comment..." style="flex: 1; background-color: #3a3b3c; border: none; padding: 8px 12px; border-radius: 20px; color: #fff; outline: none; font-size: 14px;">
+                            </div>
+                        </div>
+                    `;
+
+                    // Isuksok ang bag-ong post sa pinaka-unang pwesto sa listahan
+                    postsList.insertBefore(newPost, postsList.firstChild);
+                    
+                    // Paandaron ang mga buttons sa bag-ong post
+                    setupPostInteractions(newPost);
+
+                    // Limpyohan ang input box
+                    postInput.value = "";
+                }
+            }
+        });
+    </script>
+</body>
+</html>

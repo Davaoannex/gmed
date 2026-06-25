@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GMed - Log In or Sign Up</title>
+    <link rel="stylesheet" href="login-style.css">
+    <!-- FontAwesome for the close icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="login-container">
+        <!-- Left Side: Brand and Slogan -->
+        <div class="brand-box">
+            <h1 class="logo">GMed</h1>
+            <p class="slogan">Connect with friends and the world around you on GMed.</p>
+        </div>
+
+        <!-- Right Side: Login Card Form -->
+        <div class="form-box">
+            <!-- Added an id to the form for JavaScript handling -->
+            <form class="login-form" id="login-form">
+                <input type="text" placeholder="Email address or mobile number" required>
+                <input type="password" placeholder="Password" required>
+                
+                <button type="submit" class="login-btn">Log In</button>
+                
+                <a href="#" class="forgot-link">Forgot Password?</a>
+                
+                <div class="divider"></div>
+                
+                <button type="button" class="register-btn" id="open-register">Create New Account</button>
+            </form>
+            <p class="create-page-text"><strong>Create a Page</strong> for a celebrity, brand, or business.</p>
+        </div>
+    </div>
+
+    <!-- REGISTRATION MODAL POPUP -->
+    <div class="modal-overlay" id="register-modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div>
+                    <h2>Sign Up</h2>
+                    <p>It's quick and easy.</p>
+                </div>
+                <button class="close-btn" id="close-register"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="modal-divider"></div>
+
+            <form class="register-form">
+                <div class="input-row">
+                    <input type="text" placeholder="First name" required>
+                    <input type="text" placeholder="Surname" required>
+                </div>
+                
+                <input type="text" placeholder="Mobile number or email address" required>
+                <input type="password" placeholder="New password" required>
+
+                <!-- Date of Birth Section -->
+                <div class="label-text">Date of birth</div>
+                <div class="select-row">
+                    <select>
+                        <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+                    </select>
+                    <select>
+                        <option>Jan</option><option>Feb</option><option>Mar</option><option>Apr</option><option>May</option>
+                    </select>
+                    <select>
+                        <option>2026</option><option>2025</option><option>2024</option><option>2023</option>
+                    </select>
+                </div>
+
+                <!-- Gender Section -->
+                <div class="label-text">Gender</div>
+                <div class="gender-row">
+                    <label class="gender-box">
+                        <span>Female</span>
+                        <input type="radio" name="gender" value="female">
+                    </label>
+                    <label class="gender-box">
+                        <span>Male</span>
+                        <input type="radio" name="gender" value="male">
+                    </label>
+                    <label class="gender-box">
+                        <span>Custom</span>
+                        <input type="radio" name="gender" value="custom">
+                    </label>
+                </div>
+
+                <p class="policy-text">People who use our service may have uploaded your contact information to GMed. Learn more.</p>
+                
+                <button type="submit" class="signup-submit-btn">Sign Up</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT FOR MODAL & PAGE REDIRECTION -->
+    <script>
+        // Modal Open/Close Elements
+        const openBtn = document.getElementById('open-register');
+        const closeBtn = document.getElementById('close-register');
+        const modal = document.getElementById('register-modal');
+
+        openBtn.addEventListener('click', () => {
+            modal.classList.add('show');
+        });
+
+        closeBtn.addEventListener('click', () => {
+            modal.classList.remove('show');
+        });
+
+        // NEW: Login Form Redirection Logic
+        const loginForm = document.getElementById('login-form');
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault(); // Pugngan ang default page reload sa form submit
+            window.location.href = "index.html"; // Mobalhin dretso sa imong Home Page
+        });
+    </script>
+
+</body>
+</html>
