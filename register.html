@@ -4,7 +4,92 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GMed - Register Account</title>
-    <link rel="stylesheet" href="login-style.css"> <!-- Gamiton ra ang karaan nga style para uniporme -->
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .login-container {
+            background-color: #1e1e1e;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 24px;
+            font-size: 28px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px;
+            background-color: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 16px;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        .login-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .signup-link {
+            margin-top: 24px;
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        .signup-link a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .signup-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
 
@@ -18,14 +103,13 @@
                 <input type="email" id="reg-email" placeholder="Email Address" required>
             </div>
             <div class="input-group">
-                <input type="password" id="reg-password" placeholder="Password (min 6 chars)" required>
+                <input type="password" id="reg-password" placeholder="Password (min 6 characters)" required>
             </div>
             <button type="submit" class="login-btn">Sign Up</button>
         </form>
-        <p class="signup-link">Naa na kay account? <a href="login.html">Log In diri</a></p>
+        <p class="signup-link">Already have an account? <a href="login.html">Log In here</a></p>
     </div>
 
-    <!-- KINI NGA SCRIPT ANG MO-SAVE SA FIREBASE -->
     <script type="module">
         import { auth, db, createUserWithEmailAndPassword, doc, setDoc } from "./firebase-config.js";
 
@@ -37,23 +121,23 @@
             const password = document.getElementById('reg-password').value;
 
             try {
-                // 1. I-create ang user sa Firebase Authentication
+                // 1. Create the user in Firebase Auth
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // 2. I-save ang iyang Full Name sa Firestore Database
+                // 2. Save the details to Firestore Database
                 await setDoc(doc(db, "users", user.uid), {
                     fullName: name,
                     email: email,
                     createdAt: new Date().toISOString()
                 });
 
-                alert("Malampuson ang pag-create sa imong account!");
-                window.location.href = "login.html"; // Ibalhin siya sa login screen
+                alert("Account created successfully!");
+                window.location.href = "login.html";
 
             } catch (error) {
                 console.error(error);
-                alert("Sayop: " + error.message);
+                alert("Registration failed: " + error.message);
             }
         });
     </script>

@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GMed - Home Dashboard</title>
-    <!-- Mahimo nimong usbon o isumpay ang imong karaan nga CSS file diri -->
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -64,69 +63,60 @@
 </head>
 <body>
 
-    <!-- NAVBAR AREA -->
     <nav>
         <h1>GMed Portal</h1>
         <div class="nav-links">
-            <!-- Dinhi mogawas ang ngalan sa user kung ma-load na gikan sa Firestore -->
             <span class="user-name" id="user-display-name">Loading user...</span>
             <button class="logout-btn" id="logout-btn">Log Out</button>
         </div>
     </nav>
 
-    <!-- MAIN CONTENT AREA -->
     <div class="main-content">
         <div class="welcome-card">
-            <h2>Welcome sa Imong Dashboard</h2>
-            <p>Kini nga page protektado na sa Firebase Authentication. Kung naay mosulay og sud nga wala naka-login, i-redirect sila og balik sa login screen.</p>
+            <h2>Welcome to your Dashboard</h2>
+            <p>This page is securely protected by Firebase Authentication. Unauthorized users attempting to access this path directly will be redirected to the login panel automatically.</p>
         </div>
     </div>
 
-    <!-- ======================================================== -->
-    <!-- FIREBASE SECURITY UG LOGOUT SCRIPT -->
-    <!-- ======================================================== -->
     <script type="module">
         import { auth, db, onAuthStateChanged, signOut, doc, getDoc } from "./firebase-config.js";
 
-        // 1. Susiha ang status sa user (Naka-login ba o wala)
+        // 1. Session State Observer
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                console.log("Naka-login ang user:", user.email);
+                console.log("Authenticated user:", user.email);
                 
                 try {
-                    // Kuhaon ang tinuod nga Full Name sa user gikan sa Firestore Database
+                    // Fetch profile record from the database collection
                     const docRef = doc(db, "users", user.uid);
                     const docSnap = await getDoc(docRef);
                     
                     if (docSnap.exists()) {
                         const userData = docSnap.data();
-                        // Ibutang ang ngalan sa user didto sa navbar
                         document.getElementById('user-display-name').innerText = userData.fullName;
                     } else {
-                        // Kung walay ngalan sa database, email lang ang ipakita
                         document.getElementById('user-display-name').innerText = user.email;
                     }
                 } catch (error) {
-                    console.error("Sipyat sa pagkuha sa user data:", error);
+                    console.error("Error retrieving profile dataset:", error);
                     document.getElementById('user-display-name').innerText = user.email;
                 }
 
             } else {
-                // Kung KINSA MAN ang mosulay og sud nga WALAY account, i-kick out dretso sa login page
-                console.log("Walay user nga naka-login. I-redirect sa login.html...");
+                console.log("Session not found. Redirecting to login context...");
                 window.location.href = "login.html";
             }
         });
 
-        // 2. Pagana sa Logout Button
+        // 2. Sign-Out Action Event Listener
         const logoutBtn = document.getElementById('logout-btn');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', () => {
                 signOut(auth).then(() => {
-                    console.log("Malampuson nga naka-logout.");
+                    console.log("Sign-out process complete.");
                     window.location.href = "login.html";
                 }).catch((error) => {
-                    alert("Error sa pag-logout: " + error.message);
+                    alert("Sign-out error: " + error.message);
                 });
             });
         }
