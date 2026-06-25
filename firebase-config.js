@@ -1,9 +1,9 @@
-// I-import ang Firebase SDKs nga gikinahanglan gikan sa CDN
+// Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// Imong tinuod nga Firebase credentials gikan sa screenshot
+// Your web app's Firebase configuration derived from your console credentials
 const firebaseConfig = {
   apiKey: "AIzaSyBSZ85nFiFXbFXydWCFSXoje_jJBMKHn_w",
   authDomain: "gmed-web.firebaseapp.com",
@@ -14,10 +14,20 @@ const firebaseConfig = {
   measurementId: "G-XB4W78PZ7R"
 };
 
-// I-initialize ang Firebase
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// I-export kini para magamit sa ubang files
-export { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, doc, setDoc, getDoc };
+// Export all authentication and database modules for your HTML pages
+export { 
+  auth, 
+  db, 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  onAuthStateChanged, 
+  signOut, 
+  doc, 
+  setDoc, 
+  getDoc 
+};
