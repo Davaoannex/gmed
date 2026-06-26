@@ -60,7 +60,7 @@
             margin-bottom: 20px;
             font-size: 13px;
         }
-        /* SEARCH BOX STYLING */
+        /* Search Box Setup */
         .search-box {
             background-color: var(--bg-card);
             padding: 15px;
@@ -103,12 +103,17 @@
         .search-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 10px;
+            justify-content: space-between;
+            padding: 12px;
             border-bottom: 1px solid #2d2e30;
         }
         .search-item:last-child {
             border-bottom: none;
+        }
+        .user-meta-block {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
         .search-avatar {
             width: 35px;
@@ -130,7 +135,24 @@
             font-size: 12px;
             color: var(--text-muted);
         }
-        /* Post Box */
+        /* ADD FRIEND BUTTON STYLING */
+        .friend-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .friend-btn.is-friend {
+            background-color: #3a3b3c;
+            color: #b0b3b8;
+            cursor: default;
+        }
+        /* Post Box Setup */
         .post-box, .feed-card {
             background-color: var(--bg-card);
             padding: 18px;
@@ -166,7 +188,7 @@
             cursor: pointer;
             font-size: 15px;
         }
-        /* Feed Card Components */
+        /* Feed Card Layout */
         .feed-header {
             display: flex;
             justify-content: space-between;
@@ -243,7 +265,7 @@
             background-color: var(--bg-input);
             color: white;
         }
-        /* Comments Component */
+        /* Comments Layout Setup */
         .comments-section {
             background-color: #1c1e21;
             padding: 12px;
@@ -298,7 +320,6 @@
         
         <div id="welcome-user" class="welcome-msg">Connecting to session...</div>
 
-        <!-- SEARCH INTERFACE CONTAINER -->
         <div class="search-box">
             <form class="search-form" id="search-form">
                 <input type="text" id="search-input" placeholder="Pangita og kaila gamit ang Full Name..." required>
@@ -307,7 +328,6 @@
             <div class="search-results" id="search-results"></div>
         </div>
 
-        <!-- Create Post Box -->
         <div class="post-box">
             <form id="post-form">
                 <textarea id="post-content" placeholder="Unsay imong gihuna-huna karon?"></textarea>
@@ -315,15 +335,13 @@
             </form>
         </div>
 
-        <!-- News Feed Section -->
         <div id="news-feed"></div>
     </div>
 
-    <!-- FIREBASE INTEGRATION MODULE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, increment, deleteDoc, getDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, increment, deleteDoc, getDoc, getDocs, where, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyAEMcZkLwEp7Zlt21aBwy8HZfGmy2-LP7A", 
@@ -349,9 +367,11 @@
         const searchResults = document.getElementById('search-results');
 
         let currentFullName = "GMed User";
+        let currentUid = null;
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
+                currentUid = user.uid;
                 try {
                     const userDoc = await getDoc(doc(db, "users", user.uid));
                     if (userDoc.exists() && userDoc.data().fullName) {
@@ -368,16 +388,15 @@
             }
         });
 
-        // SEARCH BUTTON EXECUTION LOGIC
+        // SEARCH + FRIENDS CONNECTOR LOGIC
         searchForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const queryText = searchInput.value.trim();
-            if (!queryText) return;
+            if (!queryText || !currentUid) return;
 
             searchResults.innerHTML = "<div style='padding:10px; font-size:13px; color:#b0b3b8;'>Nag-search...</div>";
 
             try {
-                // Pagpangita sa users nga match ang fullName gamit ang query
                 const q = query(collection(db, "users"), where("fullName", "==", queryText));
                 const querySnapshot = await getDocs(q);
                 
@@ -388,27 +407,60 @@
                     return;
                 }
 
-                querySnapshot.forEach((userDoc) => {
+                querySnapshot.forEach(async (userDoc) => {
+                    const targetUid = userDoc.id;
                     const userData = userDoc.data();
                     const uName = userData.fullName || "GMed User";
                     const uEmail = userData.email || "";
                     const uInitials = uName.split(" ").map(n => n[0]).join("").substring(0, 2);
 
+                    // Skip kung imo rang kaugalingong account ang nakit-an
+                    if (targetUid === currentUid) return;
+
                     const item = document.createElement('div');
                     item.className = 'search-item';
                     item.innerHTML = `
-                        <div class="search-avatar">${uInitials}</div>
-                        <div class="search-info">
-                            <strong>${uName}</strong><br>
-                            <span>${uEmail}</span>
+                        <div class="user-meta-block">
+                            <div class="search-avatar">${uInitials}</div>
+                            <div class="search-info">
+                                <strong>${uName}</strong><br>
+                                <span>${uEmail}</span>
+                            </div>
                         </div>
+                        <button class="friend-btn" id="friend-btn-${targetUid}">Add Friend</button>
                     `;
                     searchResults.appendChild(item);
+
+                    // Susiha kung friend na ba nimo daan
+                    const friendCheck = await getDoc(doc(db, "users", currentUid, "friends", targetUid));
+                    const btn = document.getElementById(`friend-btn-${targetUid}`);
+                    if (friendCheck.exists()) {
+                        btn.innerText = "✓ Friends";
+                        btn.classList.add('is-friend');
+                    } else {
+                        // Click logic para mag Add Friend
+                        btn.addEventListener('click', async () => {
+                            try {
+                                await setDoc(doc(db, "users", currentUid, "friends", targetUid), {
+                                    uid: targetUid,
+                                    fullName: uName,
+                                    email: uEmail,
+                                    timestamp: new Date().toISOString()
+                                });
+                                btn.innerText = "✓ Friends";
+                                btn.classList.add('is-friend');
+                                alert(`Nahimo na nimo nga friend si ${uName}!`);
+                            } catch (err) {
+                                console.error(err);
+                                alert("Dili ma-add as friend.");
+                            }
+                        });
+                    }
                 });
 
             } catch (error) {
-                console.error("Search Error: ", error);
-                searchResults.innerHTML = "<div style='padding:10px; font-size:13px; color:#f02849;'>Naay error sa pag-search.</div>";
+                console.error(error);
+                searchResults.innerHTML = "<div style='padding:10px; font-size:13px; color:#f02849;'>Error searching.</div>";
             }
         });
 
@@ -423,7 +475,7 @@
             }
         });
 
-        // Save new post logic
+        // Save new post
         postForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const text = postContent.value.trim();
