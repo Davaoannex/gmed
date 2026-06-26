@@ -136,7 +136,7 @@
             try {
                 await signInWithEmailAndPassword(auth, email, password);
                 alert("Login successful!");
-                window.location.href = "index.html"; // O kung asa nimo gusto i-redirect human mo-login
+                window.location.href = "dashboard.html"; // O kung asa nimo gusto i-redirect human mo-login
             } catch (error) {
                 console.error(error);
                 alert("Login failed: " + error.message);
