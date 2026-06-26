@@ -40,6 +40,7 @@
             margin: 0;
             font-size: 24px;
             letter-spacing: 0.5px;
+            cursor: pointer;
         }
         .logout-btn {
             background-color: #4e4f50;
@@ -59,6 +60,11 @@
             color: var(--text-muted);
             margin-bottom: 20px;
             font-size: 13px;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .welcome-msg:hover {
+            color: white;
         }
         /* Search Box Setup */
         .search-box {
@@ -114,6 +120,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            cursor: pointer;
         }
         .search-avatar {
             width: 35px;
@@ -314,7 +321,7 @@
 
     <div class="container">
         <div class="header-area">
-            <h1>GMed Feed</h1>
+            <h1 onclick="window.location.reload();">GMed Feed</h1>
             <button id="logout-button" class="logout-btn">Log Out</button>
         </div>
         
@@ -369,7 +376,6 @@
         let currentFullName = "GMed User";
         let currentUid = null;
 
-        // Try to safe-load auth session data
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUid = user.uid;
@@ -381,28 +387,25 @@
                         currentFullName = user.email.split('@')[0];
                     }
                 } catch (e) {
-                    console.error("Session info error:", e);
                     currentFullName = user.email.split('@')[0];
                 }
-                welcomeUser.innerText = `Naka-login isip: ${currentFullName}`;
+                welcomeUser.innerText = `Naka-login isip: ${currentFullName} (Click to View Profile)`;
+                welcomeUser.onclick = () => {
+                    window.location.href = `profile.html?uid=${user.uid}`;
+                };
             } else {
                 welcomeUser.innerText = "Naka-login isip: Guest Mode (Testing)";
             }
         });
 
-        // SAFELY ISOLATED SEARCH + FRIENDS CONNECTOR LOGIC
+        // SEARCH LOGIC
         searchForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const queryText = searchInput.value.trim();
             if (!queryText) return;
 
-            // Safe fallback kung wala pa naka-load ang main session UID
             const activeUid = currentUid || (auth.currentUser ? auth.currentUser.uid : null);
-            if (!activeUid) {
-                alert("Palihug hulata kadiyot samtang nag-connect pa ang session...");
-                return;
-            }
+            if (!activeUid) return;
 
             searchResults.innerHTML = "<div style='padding:10px; font-size:13px; color:#b0b3b8;'>Nag-search...</div>";
 
@@ -413,7 +416,7 @@
                 searchResults.innerHTML = "";
 
                 if (querySnapshot.empty) {
-                    searchResults.innerHTML = "<div style='padding:10px; font-size:13px; color:#f02849;'>Walay nakit-an nga user ana nga ngalan.</div>";
+                    searchResults.innerHTML = "<div style='padding:10px; font-size:13px; color:#f02849;'>Walay nakit-an nga user.</div>";
                     return;
                 }
 
@@ -424,34 +427,29 @@
                     const uEmail = userData.email || "";
                     const uInitials = uName.split(" ").map(n => n[0]).join("").substring(0, 2);
 
-                    if (targetUid === activeUid) {
-                        searchResults.innerHTML = "<div style='padding:10px; font-size:13px; color:#b0b3b8;'>Kaugalingon nimo nga account ang nakit-an.</div>";
-                        return;
-                    }
-
                     const item = document.createElement('div');
                     item.className = 'search-item';
                     item.innerHTML = `
-                        <div class="user-meta-block">
+                        <div class="user-meta-block" onclick="window.location.href='profile.html?uid=${targetUid}'">
                             <div class="search-avatar">${uInitials}</div>
                             <div class="search-info">
                                 <strong>${uName}</strong><br>
                                 <span>${uEmail}</span>
                             </div>
                         </div>
-                        <button class="friend-btn" id="friend-btn-${targetUid}">Add Friend</button>
+                        ${targetUid !== activeUid ? `<button class="friend-btn" id="friend-btn-${targetUid}">Add Friend</button>` : ''}
                     `;
                     searchResults.appendChild(item);
 
-                    try {
+                    if (targetUid !== activeUid) {
                         const friendCheck = await getDoc(doc(db, "users", activeUid, "friends", targetUid));
                         const btn = document.getElementById(`friend-btn-${targetUid}`);
-                        
                         if (friendCheck.exists()) {
                             btn.innerText = "✓ Friends";
                             btn.classList.add('is-friend');
                         } else {
-                            btn.addEventListener('click', async () => {
+                            btn.addEventListener('click', async (event) => {
+                                event.stopPropagation(); // para dili mo trigger ang click sa profile link
                                 try {
                                     await setDoc(doc(db, "users", activeUid, "friends", targetUid), {
                                         uid: targetUid,
@@ -461,21 +459,16 @@
                                     });
                                     btn.innerText = "✓ Friends";
                                     btn.classList.add('is-friend');
-                                    alert(`Nahimo na nimo nga friend si ${uName}!`);
+                                    alert(`Friend na nimo si ${uName}!`);
                                 } catch (err) {
                                     console.error(err);
-                                    alert("Dili ma-add as friend.");
                                 }
                             });
                         }
-                    } catch (checkErr) {
-                        console.error("Friend check subcollection error:", checkErr);
                     }
                 });
-
             } catch (error) {
-                console.error("Search system core execution error:", error);
-                searchResults.innerHTML = "<div style='padding:10px; font-size:13px; color:#f02849;'>Error sa pag-search. Susiha ang console logs.</div>";
+                console.error(error);
             }
         });
 
@@ -483,7 +476,6 @@
         logoutButton.addEventListener('click', async () => {
             try {
                 await signOut(auth);
-                alert("Logged out successfully!");
                 window.location.href = "login.html";
             } catch (error) {
                 console.error(error);
@@ -509,12 +501,10 @@
             }
         });
 
-        // Live Render News Feed List
+        // Live News Feed
         const feedQuery = query(collection(db, "posts"), orderBy("timestamp", "desc"));
-        
         onSnapshot(feedQuery, (snapshot) => {
             newsFeed.innerHTML = ""; 
-
             snapshot.forEach((postDoc) => {
                 const post = postDoc.data();
                 const postId = postDoc.id;
@@ -536,12 +526,10 @@
                         <button class="delete-btn" id="delete-btn-${postId}">Delete</button>
                     </div>
                     <div class="content">${post.content}</div>
-                    
                     <div class="card-actions">
                         <button class="action-btn" id="like-btn-${postId}">👍 Like (${likes})</button>
                         <button class="action-btn" id="comment-focus-${postId}">💬 Comment</button>
                     </div>
-
                     <div class="comments-section">
                         <div id="comments-list-${postId}"></div>
                         <form class="comment-form" id="comment-form-${postId}">
@@ -552,28 +540,16 @@
                 `;
                 newsFeed.appendChild(card);
 
-                // 1. DELETE LOGIC
                 document.getElementById(`delete-btn-${postId}`).addEventListener('click', async () => {
-                    if (confirm("Siguro ka nga gusto nimo papason kini nga post?")) {
-                        try {
-                            await deleteDoc(doc(db, "posts", postId));
-                        } catch (error) {
-                            alert("Error: " + error.message);
-                        }
+                    if (confirm("Gusto nimo papason?")) {
+                        try { await deleteDoc(doc(db, "posts", postId)); } catch (e) {}
                     }
                 });
 
-                // 2. LIKE LOGIC
                 document.getElementById(`like-btn-${postId}`).addEventListener('click', async () => {
-                    const postRef = doc(db, "posts", postId);
-                    try {
-                        await updateDoc(postRef, { likesCount: increment(1) });
-                    } catch (error) {
-                        console.error(error);
-                    }
+                    try { await updateDoc(doc(db, "posts", postId), { likesCount: increment(1) }); } catch (e) {}
                 });
 
-                // 3. REALTIME COMMENTS LOGIC
                 const commentsQuery = query(collection(db, "posts", postId, "comments"), orderBy("timestamp", "asc"));
                 onSnapshot(commentsQuery, (commentSnapshot) => {
                     const commentsList = document.getElementById(`comments-list-${postId}`);
@@ -587,23 +563,18 @@
                     });
                 });
 
-                // 4. SUBMIT COMMENT LOGIC
                 document.getElementById(`comment-form-${postId}`).addEventListener('submit', async (e) => {
                     e.preventDefault();
                     const inputField = document.getElementById(`comment-input-${postId}`);
-                    const commentText = inputField.value.trim();
-                    if (!commentText) return;
-
+                    if (!inputField.value.trim()) return;
                     try {
                         await addDoc(collection(db, "posts", postId, "comments"), {
-                            text: commentText,
+                            text: inputField.value.trim(),
                             author: currentFullName,
                             timestamp: new Date().toISOString()
                         });
                         inputField.value = "";
-                    } catch (error) {
-                        console.error(error);
-                    }
+                    } catch (e) {}
                 });
             });
         });
