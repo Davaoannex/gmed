@@ -84,7 +84,7 @@
 
     <div class="container">
         <h1>GMed Feed</h1>
-        <div id="welcome-user" class="welcome-msg">Loading profile...</div>
+        <div id="welcome-user" class="welcome-msg">Connecting to session...</div>
 
         <div class="post-box">
             <form id="post-form">
@@ -100,11 +100,11 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Gamita ang imong saktong credentials (API key 2)
+        // Giasay-basa gamit ang imong tinuod nga narekober nga API key
         const firebaseConfig = {
-          apiKey: "AIzaSyAzV_2mBfP3K8iX_pLq89XWd_Z4M_N-Rk", // Siguroha nga kani ang imong saktong API key 2 string
+          apiKey: "AIzaSyAEMcZkLwEp7Zlt21aBwy8HZfGmy2-LP7A", 
           authDomain: "gmed-web.firebaseapp.com",
           projectId: "gmed-web",
           storageBucket: "gmed-web.firebasestorage.app",
@@ -122,33 +122,19 @@
         const newsFeed = document.getElementById('news-feed');
         const welcomeUser = document.getElementById('welcome-user');
 
-        let currentUserName = "Anonymous User";
+        let currentUserName = "User";
 
-        // 1. Susiha kung kinsay naka-login ug kuhaa ang tinuod nga ngalan gikan sa Firestore
-        onAuthStateChanged(auth, async (user) => {
+        // Mas luwas nga check aron malikayan ang kalit nga pagka-out
+        onAuthStateChanged(auth, (user) => {
             if (user) {
-                try {
-                    const userDocRef = doc(db, "users", user.uid);
-                    const userDocSnap = await getDoc(userDocRef);
-                    
-                    if (userDocSnap.exists()) {
-                        const userData = userDocSnap.data();
-                        currentUserName = userData.fullName || "User";
-                    } else {
-                        currentUserName = user.email;
-                    }
-                } catch (error) {
-                    console.error("Error fetching user profile:", error);
-                    currentUserName = user.email;
-                }
-                welcomeUser.innerText = `Naka-login isip: ${currentUserName}`;
+                currentUserName = user.email ? user.email.split('@')[0] : "User";
+                welcomeUser.innerText = `Naka-login isip: ${user.email}`;
             } else {
-                // Kung wala naka-login, pabalika sa login page
-                window.location.href = "login.html";
+                console.log("No active user session detected.");
             }
         });
 
-        // 2. Logic para sa pag-save og bag-ong post (apil ang tinuod nga ngalan)
+        // Pag-save og bag-ong post
         postForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const text = postContent.value.trim();
@@ -170,7 +156,7 @@
             }
         });
 
-        // 3. Realtime listener para sa Feed display
+        // Realtime loader sa feed listahan
         const feedQuery = query(collection(db, "posts"), orderBy("timestamp", "desc"));
         
         onSnapshot(feedQuery, (snapshot) => {
@@ -178,9 +164,7 @@
 
             snapshot.forEach((doc) => {
                 const post = doc.data();
-                
-                // Gamiton ang authorName kung anaa, kung wala ang email ang i-fallback
-                const displayAuthor = post.authorName || post.author || "Anonymous User";
+                const displayAuthor = post.authorEmail || "Anonymous User";
                 
                 const card = document.createElement('div');
                 card.className = 'feed-card';
