@@ -60,6 +60,76 @@
             margin-bottom: 20px;
             font-size: 13px;
         }
+        /* SEARCH BOX STYLING */
+        .search-box {
+            background-color: var(--bg-card);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 18px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .search-form {
+            display: flex;
+            gap: 10px;
+        }
+        .search-form input {
+            flex: 1;
+            background-color: var(--bg-input);
+            border: 1px solid #4a4b4c;
+            border-radius: 8px;
+            color: white;
+            padding: 10px 14px;
+            font-size: 14px;
+        }
+        .search-form input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+        .search-form button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 18px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .search-results {
+            margin-top: 10px;
+            background-color: #1c1e21;
+            border-radius: 8px;
+            padding: 0;
+        }
+        .search-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            border-bottom: 1px solid #2d2e30;
+        }
+        .search-item:last-child {
+            border-bottom: none;
+        }
+        .search-avatar {
+            width: 35px;
+            height: 35px;
+            background-color: #2374e1;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+        .search-info {
+            font-size: 14px;
+        }
+        .search-info span {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
         /* Post Box */
         .post-box, .feed-card {
             background-color: var(--bg-card);
@@ -96,7 +166,7 @@
             cursor: pointer;
             font-size: 15px;
         }
-        /* Modern Feed Header Setup with Avatar */
+        /* Feed Card Components */
         .feed-header {
             display: flex;
             justify-content: space-between;
@@ -111,7 +181,7 @@
         .avatar {
             width: 40px;
             height: 40px;
-            background-color: #e15b23; /* Or any premium color */
+            background-color: #e15b23;
             color: white;
             border-radius: 50%;
             display: flex;
@@ -120,7 +190,6 @@
             font-weight: bold;
             font-size: 14px;
             text-transform: uppercase;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
         .feed-card .meta {
             font-size: 13px;
@@ -149,7 +218,7 @@
             line-height: 1.5;
             white-space: pre-wrap;
             margin-bottom: 15px;
-            padding-left: 50px; /* Aligned sa text, dili maigo sa avatar */
+            padding-left: 50px;
         }
         /* Actions Area */
         .card-actions {
@@ -179,7 +248,7 @@
             background-color: #1c1e21;
             padding: 12px;
             border-radius: 8px;
-            margin-left: 50px; /* Aligned pod */
+            margin-left: 50px;
         }
         .comment-item {
             font-size: 13px;
@@ -229,6 +298,16 @@
         
         <div id="welcome-user" class="welcome-msg">Connecting to session...</div>
 
+        <!-- SEARCH INTERFACE CONTAINER -->
+        <div class="search-box">
+            <form class="search-form" id="search-form">
+                <input type="text" id="search-input" placeholder="Pangita og kaila gamit ang Full Name..." required>
+                <button type="submit">Search</button>
+            </form>
+            <div class="search-results" id="search-results"></div>
+        </div>
+
+        <!-- Create Post Box -->
         <div class="post-box">
             <form id="post-form">
                 <textarea id="post-content" placeholder="Unsay imong gihuna-huna karon?"></textarea>
@@ -236,13 +315,15 @@
             </form>
         </div>
 
+        <!-- News Feed Section -->
         <div id="news-feed"></div>
     </div>
 
+    <!-- FIREBASE INTEGRATION MODULE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, increment, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, increment, deleteDoc, getDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyAEMcZkLwEp7Zlt21aBwy8HZfGmy2-LP7A", 
@@ -263,10 +344,12 @@
         const newsFeed = document.getElementById('news-feed');
         const welcomeUser = document.getElementById('welcome-user');
         const logoutButton = document.getElementById('logout-button');
+        const searchForm = document.getElementById('search-form');
+        const searchInput = document.getElementById('search-input');
+        const searchResults = document.getElementById('search-results');
 
         let currentFullName = "GMed User";
 
-        // Kuhaon ang tinuod nga Full Name gikan sa 'users' collection base sa UID
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 try {
@@ -285,6 +368,50 @@
             }
         });
 
+        // SEARCH BUTTON EXECUTION LOGIC
+        searchForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const queryText = searchInput.value.trim();
+            if (!queryText) return;
+
+            searchResults.innerHTML = "<div style='padding:10px; font-size:13px; color:#b0b3b8;'>Nag-search...</div>";
+
+            try {
+                // Pagpangita sa users nga match ang fullName gamit ang query
+                const q = query(collection(db, "users"), where("fullName", "==", queryText));
+                const querySnapshot = await getDocs(q);
+                
+                searchResults.innerHTML = "";
+
+                if (querySnapshot.empty) {
+                    searchResults.innerHTML = "<div style='padding:10px; font-size:13px; color:#f02849;'>Walay nakit-an nga user ana nga ngalan.</div>";
+                    return;
+                }
+
+                querySnapshot.forEach((userDoc) => {
+                    const userData = userDoc.data();
+                    const uName = userData.fullName || "GMed User";
+                    const uEmail = userData.email || "";
+                    const uInitials = uName.split(" ").map(n => n[0]).join("").substring(0, 2);
+
+                    const item = document.createElement('div');
+                    item.className = 'search-item';
+                    item.innerHTML = `
+                        <div class="search-avatar">${uInitials}</div>
+                        <div class="search-info">
+                            <strong>${uName}</strong><br>
+                            <span>${uEmail}</span>
+                        </div>
+                    `;
+                    searchResults.appendChild(item);
+                });
+
+            } catch (error) {
+                console.error("Search Error: ", error);
+                searchResults.innerHTML = "<div style='padding:10px; font-size:13px; color:#f02849;'>Naay error sa pag-search.</div>";
+            }
+        });
+
         // Logout Event
         logoutButton.addEventListener('click', async () => {
             try {
@@ -296,7 +423,7 @@
             }
         });
 
-        // Save new post logic gamit ang Full Name
+        // Save new post logic
         postForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const text = postContent.value.trim();
@@ -306,7 +433,7 @@
                 await addDoc(collection(db, "posts"), {
                     content: text,
                     timestamp: new Date().toISOString(),
-                    authorName: currentFullName, // Tinuod nga ngalan na ang isave
+                    authorName: currentFullName,
                     likesCount: 0
                 });
                 postContent.value = ""; 
@@ -324,13 +451,8 @@
             snapshot.forEach((postDoc) => {
                 const post = postDoc.data();
                 const postId = postDoc.id;
-                
-                // Fallback kung karaan nga post nga walay authorName
                 const displayAuthor = post.authorName || "Anonymous User";
-                
-                // Logic para makuha ang Initials (e.g. "Racky Bordios" -> "RB")
                 const initials = displayAuthor.split(" ").map(n => n[0]).join("").substring(0, 2);
-                
                 const likes = post.likesCount || 0;
                 
                 const card = document.createElement('div');
