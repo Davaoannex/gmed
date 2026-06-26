@@ -3,15 +3,15 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// Your web app's Firebase configuration derived from your console credentials
+// Updated configuration matching your new web app registry keys
 const firebaseConfig = {
   apiKey: "AIzaSyBSZ85nFiFXbFXydWCFSXoje_jJBMKHn_w",
   authDomain: "gmed-web.firebaseapp.com",
   projectId: "gmed-web",
   storageBucket: "gmed-web.firebasestorage.app",
   messagingSenderId: "1046815257755",
-  appId: "1:1046815257755:web:4f53ac8c7b3f2da40d023e",
-  measurementId: "G-XB4W78PZ7R"
+  appId: "1:1046815257755:web:18ba8fa65caff3260d023e",
+  measurementId: "G-M0WV44F3TC"
 };
 
 // Initialize Firebase
@@ -19,7 +19,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Export all authentication and database modules for your HTML pages
 export { 
   auth, 
   db, 
