@@ -84,7 +84,7 @@
 
     <div class="container">
         <h1>GMed Feed</h1>
-        <div id="welcome-user" class="welcome-msg">Connecting to session...</div>
+        <div id="welcome-user" class="welcome-msg">Checking session...</div>
 
         <div class="post-box">
             <form id="post-form">
@@ -102,7 +102,6 @@
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Giasay-basa gamit ang imong tinuod nga narekober nga API key
         const firebaseConfig = {
           apiKey: "AIzaSyAEMcZkLwEp7Zlt21aBwy8HZfGmy2-LP7A", 
           authDomain: "gmed-web.firebaseapp.com",
@@ -124,13 +123,15 @@
 
         let currentUserName = "User";
 
-        // Mas luwas nga check aron malikayan ang kalit nga pagka-out
+        // GI-TANGTANG ANG AUTO-REDIRECT PARA DILI NA KA MA-KICK OUT
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUserName = user.email ? user.email.split('@')[0] : "User";
                 welcomeUser.innerText = `Naka-login isip: ${user.email}`;
             } else {
-                console.log("No active user session detected.");
+                // I-log lang sa console para dili mag-loop og redirect
+                console.log("Firebase status: No session loaded yet.");
+                welcomeUser.innerText = "Naka-login isip: Guest Mode (Testing)";
             }
         });
 
@@ -146,13 +147,13 @@
                     content: text,
                     timestamp: new Date().toISOString(),
                     authorName: currentUserName,
-                    authorEmail: auth.currentUser ? auth.currentUser.email : "anonymous"
+                    authorEmail: auth.currentUser ? auth.currentUser.email : "anonymous@gmed.com"
                 });
                 
                 postContent.value = ""; 
             } catch (error) {
                 console.error("Error creating post: ", error);
-                alert("Dili makapost sa pagkakaron.");
+                alert("Dili makapost: " + error.message);
             }
         });
 
