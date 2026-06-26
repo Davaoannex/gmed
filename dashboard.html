@@ -3,12 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GMed - Dashboard Feed</title>
+    <title>GMed - Premium Dashboard</title>
     <style>
+        :root {
+            --bg-main: #18191a;
+            --bg-card: #242526;
+            --bg-input: #3a3b3c;
+            --accent-color: #2374e1;
+            --text-main: #e4e6eb;
+            --text-muted: #b0b3b8;
+        }
         body {
-            font-family: Arial, sans-serif;
-            background-color: #121212;
-            color: #e4e6eb;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
             margin: 0;
             padding: 20px;
         }
@@ -16,129 +24,154 @@
             max-width: 580px;
             margin: auto;
         }
-        /* Header & Logout */
+        /* Modern Header Setup */
         .header-area {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            background-color: var(--bg-card);
+            padding: 12px 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
         h1 {
-            color: #2374e1;
+            color: var(--accent-color);
             margin: 0;
             font-size: 24px;
+            letter-spacing: 0.5px;
         }
         .logout-btn {
-            background-color: #3a3b3c;
-            color: #e4e6eb;
+            background-color: #4e4f50;
+            color: white;
             border: none;
-            border-radius: 6px;
-            padding: 8px 14px;
-            font-weight: bold;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: 600;
             cursor: pointer;
-            font-size: 14px;
+            transition: background 0.2s;
         }
         .logout-btn:hover {
-            background-color: #4e4f50;
+            background-color: #606162;
         }
         .welcome-msg {
             text-align: center;
-            color: #b0b3b8;
+            color: var(--text-muted);
             margin-bottom: 20px;
-            font-size: 14px;
-            border-bottom: 1px solid #3a3b3c;
-            padding-bottom: 15px;
+            font-size: 13px;
         }
-        /* Post Box Setup */
+        /* Premium Post Box */
         .post-box, .feed-card {
-            background-color: #242526;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            background-color: var(--bg-card);
+            padding: 18px;
+            border-radius: 12px;
+            margin-bottom: 18px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
         .post-box textarea {
             width: 100%;
-            height: 80px;
-            background-color: #3a3b3c;
-            border: none;
-            border-radius: 6px;
+            height: 90px;
+            background-color: var(--bg-input);
+            border: 1px solid #4a4b4c;
+            border-radius: 8px;
             color: white;
-            padding: 10px;
+            padding: 12px;
             box-sizing: border-box;
             resize: none;
             font-size: 15px;
         }
         .post-box textarea:focus {
             outline: none;
+            border-color: var(--accent-color);
         }
         .post-btn {
             width: 100%;
-            background-color: #2374e1;
+            background-color: var(--accent-color);
             color: white;
             border: none;
-            border-radius: 6px;
-            padding: 8px;
+            border-radius: 8px;
+            padding: 10px;
             font-weight: bold;
             margin-top: 10px;
             cursor: pointer;
+            font-size: 15px;
+            transition: background 0.2s;
         }
         .post-btn:hover {
             background-color: #1865cf;
         }
-        /* Feed Cards Setup */
+        /* Feed Card Custom Layout */
+        .feed-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
         .feed-card .meta {
             font-size: 13px;
-            color: #b0b3b8;
-            margin-bottom: 10px;
+            color: var(--text-muted);
         }
         .feed-card .meta strong {
             color: white;
+            font-size: 14px;
+        }
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #f02849;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .delete-btn:hover {
+            background-color: rgba(240, 40, 73, 0.1);
         }
         .feed-card .content {
             font-size: 16px;
-            line-height: 1.4;
+            line-height: 1.5;
             white-space: pre-wrap;
             margin-bottom: 15px;
         }
-        /* Actions Area (Like & Comment Layout) */
+        /* Action Row Layout */
         .card-actions {
             display: flex;
-            border-top: 1px solid #3a3b3c;
-            border-bottom: 1px solid #3a3b3c;
-            padding: 5px 0;
-            margin-bottom: 10px;
+            border-top: 1px solid #3e4042;
+            border-bottom: 1px solid #3e4042;
+            padding: 4px 0;
+            margin-bottom: 12px;
         }
         .action-btn {
             flex: 1;
             background: none;
             border: none;
-            color: #b0b3b8;
+            color: var(--text-muted);
             padding: 8px;
-            font-weight: bold;
+            font-weight: 600;
             cursor: pointer;
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 14px;
+            transition: background 0.2s;
         }
         .action-btn:hover {
-            background-color: #3a3b3c;
+            background-color: var(--bg-input);
             color: white;
         }
-        /* Comments Section */
+        /* Comments Layout Setup */
         .comments-section {
             background-color: #1c1e21;
-            padding: 10px;
-            border-radius: 6px;
-            margin-top: 10px;
+            padding: 12px;
+            border-radius: 8px;
         }
         .comment-item {
             font-size: 13px;
             margin-bottom: 8px;
-            border-bottom: 1px dashed #3a3b3c;
-            padding-bottom: 5px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #2d2e30;
         }
         .comment-item strong {
-            color: #2374e1;
+            color: #4599ff;
         }
         .comment-form {
             display: flex;
@@ -146,23 +179,26 @@
         }
         .comment-form input {
             flex: 1;
-            background-color: #3a3b3c;
-            border: none;
-            border-radius: 4px 0 0 4px;
+            background-color: var(--bg-input);
+            border: 1px solid #4a4b4c;
+            border-radius: 6px 0 0 6px;
             color: white;
-            padding: 6px 10px;
+            padding: 8px 12px;
+            font-size: 13px;
         }
         .comment-form input:focus {
             outline: none;
+            border-color: var(--accent-color);
         }
         .comment-form button {
-            background-color: #2374e1;
+            background-color: var(--accent-color);
             color: white;
             border: none;
-            padding: 6px 12px;
-            border-radius: 0 4px 4px 0;
+            padding: 8px 16px;
+            border-radius: 0 6px 6px 0;
             cursor: pointer;
             font-weight: bold;
+            font-size: 13px;
         }
     </style>
 </head>
@@ -174,7 +210,7 @@
             <button id="logout-button" class="logout-btn">Log Out</button>
         </div>
         
-        <div id="welcome-user" class="welcome-msg">Checking session...</div>
+        <div id="welcome-user" class="welcome-msg">Connecting to session...</div>
 
         <div class="post-box">
             <form id="post-form">
@@ -183,14 +219,13 @@
             </form>
         </div>
 
-        <div id="news-feed">
-            </div>
+        <div id="news-feed"></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, increment, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyAEMcZkLwEp7Zlt21aBwy8HZfGmy2-LP7A", 
@@ -223,7 +258,7 @@
             }
         });
 
-        // Logout
+        // Logout Event
         logoutButton.addEventListener('click', async () => {
             try {
                 await signOut(auth);
@@ -234,7 +269,7 @@
             }
         });
 
-        // Save new post
+        // Save new post logic
         postForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const text = postContent.value.trim();
@@ -250,11 +285,11 @@
                 });
                 postContent.value = ""; 
             } catch (error) {
-                alert("Dili makapost: " + error.message);
+                alert("Error: " + error.message);
             }
         });
 
-        // Realtime loader sa feed listahan
+        // Live Render News Feed List
         const feedQuery = query(collection(db, "posts"), orderBy("timestamp", "desc"));
         
         onSnapshot(feedQuery, (snapshot) => {
@@ -269,8 +304,12 @@
                 const card = document.createElement('div');
                 card.className = 'feed-card';
                 card.innerHTML = `
-                    <div class="meta">
-                        <strong>${displayAuthor}</strong> • ${new Date(post.timestamp).toLocaleDateString()}
+                    <div class="feed-header">
+                        <div class="meta">
+                            <strong>${displayAuthor}</strong><br>
+                            ${new Date(post.timestamp).toLocaleDateString()}
+                        </div>
+                        <button class="delete-btn" id="delete-btn-${postId}">Delete</button>
                     </div>
                     <div class="content">${post.content}</div>
                     
@@ -282,41 +321,49 @@
                     <div class="comments-section">
                         <div id="comments-list-${postId}"></div>
                         <form class="comment-form" id="comment-form-${postId}">
-                            <input type="text" id="comment-input-${postId}" placeholder="Pagsuwat og comment..." required>
+                            <input type="text" id="comment-input-${postId}" placeholder="Write a comment..." required>
                             <button type="submit">Send</button>
                         </form>
                     </div>
                 `;
                 newsFeed.appendChild(card);
 
-                // 1. LIKE BUTTON LOGIC
-                document.getElementById(`like-btn-${postId}`).addEventListener('click', async () => {
-                    const postRef = doc(db, "posts", postId);
-                    try {
-                        await updateDoc(postRef, {
-                            likesCount: increment(1)
-                        });
-                    } catch (error) {
-                        console.error("Error updating likes: ", error);
+                // 1. DELETE LOGIC
+                document.getElementById(`delete-btn-${postId}`).addEventListener('click', async () => {
+                    if (confirm("Siguro ka nga gusto nimo papason kini nga post?")) {
+                        try {
+                            await deleteDoc(doc(db, "posts", postId));
+                        } catch (error) {
+                            alert("Dili mapapas ang post: " + error.message);
+                        }
                     }
                 });
 
-                // 2. LIVE COMMENTS LISTENER FOR THIS POST
+                // 2. LIKE LOGIC
+                document.getElementById(`like-btn-${postId}`).addEventListener('click', async () => {
+                    const postRef = doc(db, "posts", postId);
+                    try {
+                        await updateDoc(postRef, { likesCount: increment(1) });
+                    } catch (error) {
+                        console.error(error);
+                    }
+                });
+
+                // 3. REALTIME COMMENTS LOGIC
                 const commentsQuery = query(collection(db, "posts", postId, "comments"), orderBy("timestamp", "asc"));
                 onSnapshot(commentsQuery, (commentSnapshot) => {
                     const commentsList = document.getElementById(`comments-list-${postId}`);
                     commentsList.innerHTML = "";
-                    
                     commentSnapshot.forEach((cDoc) => {
                         const commentData = cDoc.data();
                         const cDiv = document.createElement('div');
                         cDiv.className = 'comment-item';
-                        cDiv.innerHTML = `<strong>${commentData.author}</strong>: ${commentData.text}`;
+                        cDiv.innerHTML = `strong>${commentData.author}</strong>: ${commentData.text}`;
                         commentsList.appendChild(cDiv);
                     });
                 });
 
-                // 3. SUBMIT COMMENT LOGIC
+                // 4. SUBMIT COMMENT LOGIC
                 document.getElementById(`comment-form-${postId}`).addEventListener('submit', async (e) => {
                     e.preventDefault();
                     const inputField = document.getElementById(`comment-input-${postId}`);
@@ -331,7 +378,7 @@
                         });
                         inputField.value = "";
                     } catch (error) {
-                        console.error("Error adding comment: ", error);
+                        console.error(error);
                     }
                 });
             });
