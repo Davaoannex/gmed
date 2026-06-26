@@ -109,8 +109,24 @@
 
     <!-- FIREBASE LOG IN LOGIC -->
     <script type="module">
-        import { auth, signInWithEmailAndPassword } from "./firebase-config.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
+        // Gamita ang saktong credentials nga mugana na
+        const firebaseConfig = {
+          apiKey: "AIzaSyAEMcZkLwEp7Zlt21aBwy8HZfGmy2-LP7A", 
+          authDomain: "gmed-web.firebaseapp.com",
+          projectId: "gmed-web",
+          storageBucket: "gmed-web.firebasestorage.app",
+          messagingSenderId: "1046815257755",
+          appId: "1:1046815257755:web:18ba8fa65caff3260d023e",
+          measurementId: "G-M0WV44F3TC"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Login form submission logic
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -119,10 +135,11 @@
 
             try {
                 await signInWithEmailAndPassword(auth, email, password);
-                window.location.href = "index.html";
+                alert("Login successful!");
+                window.location.href = "dashboard.html"; // O kung asa nimo gusto i-redirect human mo-login
             } catch (error) {
                 console.error(error);
-                alert("Login failed: Please check your Email and Password.");
+                alert("Login failed: " + error.message);
             }
         });
     </script>
