@@ -112,14 +112,13 @@
 
     <!-- FIREBASE REGISTRATION SCRIPT -->
     <script type="module">
-        // 1. I-import ang Firebase SDKs direkta gikan sa CDN
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // 2. I-sulod direkta ang imong configuration para mapugos ang browser sa pagbasa niini
+        // I-paste direkta ang imong bag-ong gihimo nga key sa sulod niini
         const firebaseConfig = {
-          apiKey: "AIzaSyBSZ85nFiFXbFXydWCFSXoje_jJBMKHn_w",
+          apiKey: "AIzaSyAEMcZkLwEp7Zlt21aBwy8HZfGmy2-LP7A", 
           authDomain: "gmed-web.firebaseapp.com",
           projectId: "gmed-web",
           storageBucket: "gmed-web.firebasestorage.app",
@@ -128,12 +127,10 @@
           measurementId: "G-M0WV44F3TC"
         };
 
-        // 3. I-initialize ang Firebase instance
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // 4. Form Submit handler logic
         document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -142,11 +139,9 @@
             const password = document.getElementById('reg-password').value;
 
             try {
-                // Paghimo sa user sa Firebase Auth
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // Pag-save sa Firestore Database
                 await setDoc(doc(db, "users", user.uid), {
                     fullName: name,
                     email: email,
