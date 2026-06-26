@@ -16,16 +16,38 @@
             max-width: 580px;
             margin: auto;
         }
+        /* Header & Logout Setup */
+        .header-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
         h1 {
             color: #2374e1;
-            text-align: center;
+            margin: 0;
             font-size: 24px;
+        }
+        .logout-btn {
+            background-color: #3a3b3c;
+            color: #e4e6eb;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 14px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .logout-btn:hover {
+            background-color: #4e4f50;
         }
         .welcome-msg {
             text-align: center;
             color: #b0b3b8;
             margin-bottom: 20px;
             font-size: 14px;
+            border-bottom: 1px solid #3a3b3c;
+            padding-bottom: 15px;
         }
         /* Post Box Setup */
         .post-box, .feed-card {
@@ -83,7 +105,11 @@
 <body>
 
     <div class="container">
-        <h1>GMed Feed</h1>
+        <div class="header-area">
+            <h1>GMed Feed</h1>
+            <button id="logout-button" class="logout-btn">Log Out</button>
+        </div>
+        
         <div id="welcome-user" class="welcome-msg">Checking session...</div>
 
         <div class="post-box">
@@ -99,7 +125,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -120,22 +146,34 @@
         const postContent = document.getElementById('post-content');
         const newsFeed = document.getElementById('news-feed');
         const welcomeUser = document.getElementById('welcome-user');
+        const logoutButton = document.getElementById('logout-button');
 
         let currentUserName = "User";
 
-        // GI-TANGTANG ANG AUTO-REDIRECT PARA DILI NA KA MA-KICK OUT
+        // Check auth status
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUserName = user.email ? user.email.split('@')[0] : "User";
                 welcomeUser.innerText = `Naka-login isip: ${user.email}`;
             } else {
-                // I-log lang sa console para dili mag-loop og redirect
-                console.log("Firebase status: No session loaded yet.");
+                console.log("Firebase status: No active session.");
                 welcomeUser.innerText = "Naka-login isip: Guest Mode (Testing)";
             }
         });
 
-        // Pag-save og bag-ong post
+        // 1. LOGOUT LOGIC
+        logoutButton.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                alert("Logged out successfully!");
+                window.location.href = "login.html"; // Balik sa login page pagkahuman
+            } catch (error) {
+                console.error("Error signing out: ", error);
+                alert("Dili maka-logout sa pagkakaron.");
+            }
+        });
+
+        // 2. Pag-save og bag-ong post
         postForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const text = postContent.value.trim();
@@ -157,7 +195,7 @@
             }
         });
 
-        // Realtime loader sa feed listahan
+        // 3. Realtime loader sa feed listahan
         const feedQuery = query(collection(db, "posts"), orderBy("timestamp", "desc"));
         
         onSnapshot(feedQuery, (snapshot) => {
