@@ -3,32 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GMed - Dashboard</title>
+    <title>GMed - Dashboard Feed</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #121212;
-            color: white;
-            text-align: center;
-            padding-top: 50px;
+            color: #e4e6eb;
+            margin: 0;
+            padding: 20px;
         }
         .container {
-            max-width: 600px;
+            max-width: 580px;
             margin: auto;
-            background: #1e1e1e;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
         h1 {
-            color: #3b82f6;
+            color: #2374e1;
+            text-align: center;
+            font-size: 24px;
+        }
+        /* Post Box Setup */
+        .post-box, .feed-card {
+            background-color: #242526;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .post-box textarea {
+            width: 100%;
+            height: 80px;
+            background-color: #3a3b3c;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            padding: 10px;
+            box-sizing: border-box;
+            resize: none;
+            font-size: 15px;
+        }
+        .post-box textarea:focus {
+            outline: none;
+        }
+        .post-btn {
+            width: 100%;
+            background-color: #2374e1;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px;
+            font-weight: bold;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        .post-btn:hover {
+            background-color: #1865cf;
+        }
+        /* Feed Cards Setup */
+        .feed-card .meta {
+            font-size: 13px;
+            color: #b0b3b8;
+            margin-bottom: 10px;
+        }
+        .feed-card .content {
+            font-size: 16px;
+            line-height: 1.4;
+            white-space: pre-wrap;
         }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <h1>Welcome sa Dashboard, Racky!</h1>
-        <p>Malampuson ka nga naka-login sa GMed Web application.</p>
+        <h1>GMed Feed</h1>
+
+        <div class="post-box">
+            <form id="post-form">
+                <textarea id="post-content" placeholder="Unsay imong gihuna-huna karon?"></textarea>
+                <button type="submit" class="post-btn">Post</button>
+            </form>
+        </div>
+
+        <div id="news-feed">
+            </div>
     </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Gamita ang imong saktong credentials (API key 2)
+        const firebaseConfig = {
+          apiKey: "I_PASTE_DIRI_ANG_STRING_SA_API_KEY_2", 
+          authDomain: "gmed-web.firebaseapp.com",
+          projectId: "gmed-web",
+          storageBucket: "gmed-web.firebasestorage.app",
+          messagingSenderId: "1046815257755",
+          appId: "1:1046815257755:web:18ba8fa65caff3260d023e",
+          measurementId: "G-M0WV44F3TC"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const postForm = document.getElementById('post-form');
+        const postContent = document.getElementById('post-content');
+        const newsFeed = document.getElementById('news-feed');
+
+        // 1. Logic para sa pag-Save og Bag-ong Post
+        postForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = postContent.value.trim();
+
+            if (!text) return; // Ayaw isugot kung blangko
+
+            try {
+                // I-save sa collection nga "posts"
+                await addDoc(collection(db, "posts"), {
+                    content: text,
+                    timestamp: new Date().toISOString(),
+                    author: auth.currentUser ? auth.currentUser.email : "Anonymous User"
+                });
+                
+                postContent.value = ""; // Limpyohan ang text area human ma-post
+            } catch (error) {
+                console.error("Error creating post: ", error);
+                alert("Dili makapost sa pagkakaron.");
+            }
+        });
+
+        // 2. Realtime listener para sa Feed (onSnapshot)
+        // I-arrange ang posts base sa pinakabag-o nga timestamp
+        const feedQuery = query(collection(db, "posts"), orderBy("timestamp", "desc"));
+        
+        onSnapshot(feedQuery, (snapshot) => {
+            newsFeed.innerHTML = ""; // Limpyohan ang feed para sa bag-ong update
+
+            snapshot.forEach((doc) => {
+                const post = doc.data();
+                
+                // Himoong HTML box ang matag post
+                const card = document.createElement('div');
+                card.className = 'feed-card';
+                card.innerHTML = `
+                    <div class="meta">
+                        <strong>${post.author}</strong> • ${new Date(post.timestamp).toLocaleDateString()}
+                    </div>
+                    <div class="content">${post.content}</div>
+                `;
+                newsFeed.appendChild(card);
+            });
+        });
+    </script>
 </body>
 </html>
