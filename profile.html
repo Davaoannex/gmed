@@ -34,7 +34,6 @@
             cursor: pointer;
             margin-bottom: 15px;
         }
-        /* Profile Card Facebook Style */
         .profile-card {
             background-color: var(--bg-card);
             padding: 30px 20px;
@@ -63,11 +62,24 @@
             font-size: 24px;
         }
         .profile-card p {
-            margin: 0;
+            margin: 0 0 15px 0;
             color: var(--text-muted);
             font-size: 14px;
         }
-        /* Friends Section Panel */
+        .msg-btn {
+            background-color: #00a400;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            display: none; /* I-display lang kung dili kaugalingong profile */
+        }
+        .msg-btn:hover {
+            background-color: #008a00;
+        }
         .friends-section {
             background-color: var(--bg-card);
             padding: 20px;
@@ -125,6 +137,7 @@
             <div class="large-avatar" id="prof-avatar">-</div>
             <h2 id="prof-name">Loading Profile...</h2>
             <p id="prof-email">...</p>
+            <button id="message-btn" class="msg-btn">💬 Chat / Message</button>
         </div>
 
         <div class="friends-section">
@@ -137,6 +150,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -150,22 +164,32 @@
         };
 
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Kuhaon ang user ID gikan sa URL Parameter (?uid=XXXX)
         const urlParams = new URLSearchParams(window.location.search);
         const profileUid = urlParams.get('uid');
 
         if (!profileUid) {
-            alert("Walay valid nga UID.");
             window.location.href = "dashboard.html";
-        } else {
-            loadProfileData();
         }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Kung dili imo ang profile, ipakita ang message button
+                if (user.uid !== profileUid) {
+                    const msgBtn = document.getElementById('message-btn');
+                    msgBtn.style.display = "inline-block";
+                    msgBtn.onclick = () => {
+                        window.location.href = `chat.html?to=${profileUid}`;
+                    };
+                }
+                loadProfileData();
+            }
+        });
 
         async function loadProfileData() {
             try {
-                // 1. Load User Credentials
                 const userDoc = await getDoc(doc(db, "users", profileUid));
                 if (userDoc.exists()) {
                     const data = userDoc.data();
@@ -178,14 +202,12 @@
                     document.getElementById('prof-avatar').innerText = initials;
                 }
 
-                // 2. Load Friends List Panel gikan sa sub-collection
                 const friendsSnapshot = await getDocs(collection(db, "users", profileUid, "friends"));
                 const listContainer = document.getElementById('friends-list-container');
                 
                 if (!friendsSnapshot.empty) {
                     listContainer.innerHTML = "";
                     let counter = 0;
-
                     friendsSnapshot.forEach((fDoc) => {
                         counter++;
                         const fData = fDoc.data();
@@ -204,7 +226,6 @@
                         `;
                         listContainer.appendChild(item);
                     });
-
                     document.getElementById('friends-count').innerText = `Mga Amigo (${counter})`;
                 }
             } catch (err) {
