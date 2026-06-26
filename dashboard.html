@@ -16,7 +16,7 @@
             max-width: 580px;
             margin: auto;
         }
-        /* Header & Logout Setup */
+        /* Header & Logout */
         .header-area {
             display: flex;
             justify-content: space-between;
@@ -99,6 +99,70 @@
             font-size: 16px;
             line-height: 1.4;
             white-space: pre-wrap;
+            margin-bottom: 15px;
+        }
+        /* Actions Area (Like & Comment Layout) */
+        .card-actions {
+            display: flex;
+            border-top: 1px solid #3a3b3c;
+            border-bottom: 1px solid #3a3b3c;
+            padding: 5px 0;
+            margin-bottom: 10px;
+        }
+        .action-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: #b0b3b8;
+            padding: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .action-btn:hover {
+            background-color: #3a3b3c;
+            color: white;
+        }
+        /* Comments Section */
+        .comments-section {
+            background-color: #1c1e21;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+        .comment-item {
+            font-size: 13px;
+            margin-bottom: 8px;
+            border-bottom: 1px dashed #3a3b3c;
+            padding-bottom: 5px;
+        }
+        .comment-item strong {
+            color: #2374e1;
+        }
+        .comment-form {
+            display: flex;
+            margin-top: 10px;
+        }
+        .comment-form input {
+            flex: 1;
+            background-color: #3a3b3c;
+            border: none;
+            border-radius: 4px 0 0 4px;
+            color: white;
+            padding: 6px 10px;
+        }
+        .comment-form input:focus {
+            outline: none;
+        }
+        .comment-form button {
+            background-color: #2374e1;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -126,7 +190,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyAEMcZkLwEp7Zlt21aBwy8HZfGmy2-LP7A", 
@@ -150,34 +214,30 @@
 
         let currentUserName = "User";
 
-        // Check auth status
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUserName = user.email ? user.email.split('@')[0] : "User";
                 welcomeUser.innerText = `Naka-login isip: ${user.email}`;
             } else {
-                console.log("Firebase status: No active session.");
                 welcomeUser.innerText = "Naka-login isip: Guest Mode (Testing)";
             }
         });
 
-        // 1. LOGOUT LOGIC
+        // Logout
         logoutButton.addEventListener('click', async () => {
             try {
                 await signOut(auth);
                 alert("Logged out successfully!");
-                window.location.href = "login.html"; // Balik sa login page pagkahuman
+                window.location.href = "login.html";
             } catch (error) {
-                console.error("Error signing out: ", error);
-                alert("Dili maka-logout sa pagkakaron.");
+                console.error(error);
             }
         });
 
-        // 2. Pag-save og bag-ong post
+        // Save new post
         postForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const text = postContent.value.trim();
-
             if (!text) return;
 
             try {
@@ -185,25 +245,26 @@
                     content: text,
                     timestamp: new Date().toISOString(),
                     authorName: currentUserName,
-                    authorEmail: auth.currentUser ? auth.currentUser.email : "anonymous@gmed.com"
+                    authorEmail: auth.currentUser ? auth.currentUser.email : "anonymous@gmed.com",
+                    likesCount: 0
                 });
-                
                 postContent.value = ""; 
             } catch (error) {
-                console.error("Error creating post: ", error);
                 alert("Dili makapost: " + error.message);
             }
         });
 
-        // 3. Realtime loader sa feed listahan
+        // Realtime loader sa feed listahan
         const feedQuery = query(collection(db, "posts"), orderBy("timestamp", "desc"));
         
         onSnapshot(feedQuery, (snapshot) => {
             newsFeed.innerHTML = ""; 
 
-            snapshot.forEach((doc) => {
-                const post = doc.data();
+            snapshot.forEach((postDoc) => {
+                const post = postDoc.data();
+                const postId = postDoc.id;
                 const displayAuthor = post.authorEmail || "Anonymous User";
+                const likes = post.likesCount || 0;
                 
                 const card = document.createElement('div');
                 card.className = 'feed-card';
@@ -212,8 +273,67 @@
                         <strong>${displayAuthor}</strong> • ${new Date(post.timestamp).toLocaleDateString()}
                     </div>
                     <div class="content">${post.content}</div>
+                    
+                    <div class="card-actions">
+                        <button class="action-btn" id="like-btn-${postId}">👍 Like (${likes})</button>
+                        <button class="action-btn" id="comment-focus-${postId}">💬 Comment</button>
+                    </div>
+
+                    <div class="comments-section">
+                        <div id="comments-list-${postId}"></div>
+                        <form class="comment-form" id="comment-form-${postId}">
+                            <input type="text" id="comment-input-${postId}" placeholder="Pagsuwat og comment..." required>
+                            <button type="submit">Send</button>
+                        </form>
+                    </div>
                 `;
                 newsFeed.appendChild(card);
+
+                // 1. LIKE BUTTON LOGIC
+                document.getElementById(`like-btn-${postId}`).addEventListener('click', async () => {
+                    const postRef = doc(db, "posts", postId);
+                    try {
+                        await updateDoc(postRef, {
+                            likesCount: increment(1)
+                        });
+                    } catch (error) {
+                        console.error("Error updating likes: ", error);
+                    }
+                });
+
+                // 2. LIVE COMMENTS LISTENER FOR THIS POST
+                const commentsQuery = query(collection(db, "posts", postId, "comments"), orderBy("timestamp", "asc"));
+                onSnapshot(commentsQuery, (commentSnapshot) => {
+                    const commentsList = document.getElementById(`comments-list-${postId}`);
+                    commentsList.innerHTML = "";
+                    
+                    commentSnapshot.forEach((cDoc) => {
+                        const commentData = cDoc.data();
+                        const cDiv = document.createElement('div');
+                        cDiv.className = 'comment-item';
+                        cDiv.innerHTML = `<strong>${commentData.author}</strong>: ${commentData.text}`;
+                        commentsList.appendChild(cDiv);
+                    });
+                });
+
+                // 3. SUBMIT COMMENT LOGIC
+                document.getElementById(`comment-form-${postId}`).addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const inputField = document.getElementById(`comment-input-${postId}`);
+                    const commentText = inputField.value.trim();
+                    if (!commentText) return;
+
+                    try {
+                        await addDoc(collection(db, "posts", postId, "comments"), {
+                            text: commentText,
+                            author: currentUserName,
+                            timestamp: new Date().toISOString()
+                        });
+                        inputField.value = "";
+                    } catch (error) {
+                        console.error("Error adding comment: ", error);
+                    }
+                });
             });
         });
     </script>
