@@ -24,7 +24,7 @@
             max-width: 580px;
             margin: auto;
         }
-        /* Modern Header Setup */
+        /* Header & Logout Setup */
         .header-area {
             display: flex;
             justify-content: space-between;
@@ -60,7 +60,7 @@
             margin-bottom: 20px;
             font-size: 13px;
         }
-        /* Premium Post Box */
+        /* Post Box Setup */
         .post-box, .feed-card {
             background-color: var(--bg-card);
             padding: 18px;
@@ -100,7 +100,7 @@
         .post-btn:hover {
             background-color: #1865cf;
         }
-        /* Feed Card Custom Layout */
+        /* Feed Card Components */
         .feed-header {
             display: flex;
             justify-content: space-between;
@@ -134,7 +134,7 @@
             white-space: pre-wrap;
             margin-bottom: 15px;
         }
-        /* Action Row Layout */
+        /* Actions Area */
         .card-actions {
             display: flex;
             border-top: 1px solid #3e4042;
@@ -158,7 +158,7 @@
             background-color: var(--bg-input);
             color: white;
         }
-        /* Comments Layout Setup */
+        /* Comments Component Setup */
         .comments-section {
             background-color: #1c1e21;
             padding: 12px;
@@ -334,7 +334,7 @@
                         try {
                             await deleteDoc(doc(db, "posts", postId));
                         } catch (error) {
-                            alert("Dili mapapas ang post: " + error.message);
+                            alert("Dili mapapas ang post. Susiha ang console o Firestore rules: " + error.message);
                         }
                     }
                 });
@@ -358,7 +358,8 @@
                         const commentData = cDoc.data();
                         const cDiv = document.createElement('div');
                         cDiv.className = 'comment-item';
-                        cDiv.innerHTML = `strong>${commentData.author}</strong>: ${commentData.text}`;
+                        // GIKOREHIYAN DIRI (Gi-add ang `<` sa sugod sa strong tag)
+                        cDiv.innerHTML = `<strong>${commentData.author}</strong>: ${commentData.text}`;
                         commentsList.appendChild(cDiv);
                     });
                 });
