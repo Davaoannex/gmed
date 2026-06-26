@@ -3,9 +3,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// Updated configuration matching your new web app registry keys
+// Bag-ong configuration gamit ang bag-ong gihimo nga Google Cloud API Key
 const firebaseConfig = {
-  apiKey: "AIzaSyBSZ85nFiFXbFXydWCFSXoje_jJBMKHn_w",
+  apiKey: "IBUTANG_DIRI_ANG_BAG-ONG_GOOGLE_CLOUD_API_KEY", 
   authDomain: "gmed-web.firebaseapp.com",
   projectId: "gmed-web",
   storageBucket: "gmed-web.firebasestorage.app",
