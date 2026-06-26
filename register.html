@@ -110,8 +110,10 @@
         <p class="signup-link">Already have an account? <a href="login.html">Log In here</a></p>
     </div>
 
+    <!-- FIREBASE REGISTRATION SCRIPT -->
     <script type="module">
-        import { auth, db, createUserWithEmailAndPassword, doc, setDoc } from "./firebase-config.js";
+        // Added ?v=2 to force the browser to destroy its old cache and read the new API key
+        import { auth, db, createUserWithEmailAndPassword, doc, setDoc } from "./firebase-config.js?v=2";
 
         document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -141,6 +143,5 @@
             }
         });
     </script>
-
 </body>
 </html>
