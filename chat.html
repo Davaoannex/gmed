@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GMed - Messenger</title>
+    <style>
+        :root {
+            --bg-main: #18191a;
+            --bg-card: #242526;
+            --bg-input: #3a3b3c;
+            --accent-color: #0084ff; /* Messenger Blue */
+            --text-main: #e4e6eb;
+            --text-muted: #b0b3b8;
+        }
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            margin: 0;
+            padding: 15px;
+        }
+        .chat-container {
+            max-width: 500px;
+            margin: auto;
+            background-color: var(--bg-card);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            height: 85vh;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        /* Chat Top Header Bar */
+        .chat-header {
+            background-color: #2d2f30;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #3e4042;
+        }
+        .back-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: bold;
+            padding-right: 5px;
+        }
+        .chat-avatar {
+            width: 38px;
+            height: 38px;
+            background-color: var(--accent-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        .chat-header-info strong {
+            font-size: 15px;
+            display: block;
+        }
+        .chat-header-info span {
+            font-size: 11px;
+            color: #00ff00;
+        }
+        /* Messages Body Panel Area */
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background-color: #1c1e21;
+        }
+        /* Chat Bubbles Layout */
+        .message-bubble {
+            max-width: 70%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            font-size: 14.5px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+        .message-bubble.incoming {
+            background-color: #3e4042;
+            color: white;
+            align-self: flex-start;
+            border-top-left-radius: 4px;
+        }
+        .message-bubble.outgoing {
+            background-color: var(--accent-color);
+            color: white;
+            align-self: flex-end;
+            border-top-right-radius: 4px;
+        }
+        /* Chat Form Input Bottom Footer */
+        .chat-footer {
+            padding: 12px;
+            background-color: var(--bg-card);
+            border-top: 1px solid #3e4042;
+        }
+        .chat-form {
+            display: flex;
+            gap: 10px;
+        }
+        .chat-form input {
+            flex: 1;
+            background-color: var(--bg-input);
+            border: 1px solid #4a4b4c;
+            border-radius: 20px;
+            color: white;
+            padding: 10px 16px;
+            font-size: 14px;
+        }
+        .chat-form input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+        .chat-form button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <a href="dashboard.html" class="back-link">←</a>
+            <div class="chat-avatar" id="receiver-avatar">-</div>
+            <div class="chat-header-info">
+                <strong id="receiver-name">Loading...</strong>
+                <span>Active Now</span>
+            </div>
+        </div>
+
+        <div class="chat-messages" id="chat-messages-box"></div>
+
+        <div class="chat-footer">
+            <form class="chat-form" id="chat-form">
+                <input type="text" id="chat-input" placeholder="Aa" autocomplete="off" required>
+                <button type="submit">➔</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyAEMcZkLwEp7Zlt21aBwy8HZfGmy2-LP7A", 
+          authDomain: "gmed-web.firebaseapp.com",
+          projectId: "gmed-web",
+          storageBucket: "gmed-web.firebasestorage.app",
+          messagingSenderId: "1046815257755",
+          appId: "1:1046815257755:web:18ba8fa65caff3260d023e",
+          measurementId: "G-M0WV44F3TC"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+        const messagesBox = document.getElementById('chat-messages-box');
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetUid = urlParams.get('to'); // Ang UID sa tawo nga imong gichatan
+
+        let currentUid = null;
+        let chatRoomId = null;
+
+        if (!targetUid) {
+            window.location.href = "dashboard.html";
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUid = user.uid;
+                
+                // 1. Pagbuhat og Unique ChatRoom ID (Aron mag-abot inyong chat sa usa ka collection)
+                // Gi-sort ang duha ka UID aron maski kinsa ang mag-unang click, parehas ra silag chatRoomId
+                chatRoomId = currentUid < targetUid ? `${currentUid}_${targetUid}` : `${targetUid}_${currentUid}`;
+                
+                loadReceiverProfile();
+                listenToMessages();
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+
+        // Kuhaon ang ngalan sa kachat para sa Header
+        async function loadReceiverProfile() {
+            try {
+                const docSnap = await getDoc(doc(db, "users", targetUid));
+                if (docSnap.exists()) {
+                    const rName = docSnap.data().fullName || "GMed User";
+                    document.getElementById('receiver-name').innerText = rName;
+                    document.getElementById('receiver-avatar').innerText = rName.split(" ").map(n => n[0]).join("").substring(0, 2);
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        // REAL-TIME LISTENER LOOP (Kini ang gasusi kung naay bag-ong text)
+        function listenToMessages() {
+            const msgQuery = query(collection(db, "chats", chatRoomId, "messages"), orderBy("timestamp", "asc"));
+            
+            onSnapshot(msgQuery, (snapshot) => {
+                messagesBox.innerHTML = "";
+                snapshot.forEach((mDoc) => {
+                    const msgData = mDoc.data();
+                    const bubble = document.createElement('div');
+                    
+                    // I-classify kung incoming o outgoing
+                    if (msgData.senderId === currentUid) {
+                        bubble.className = "message-bubble outgoing";
+                    } else {
+                        bubble.className = "message-bubble incoming";
+                    }
+                    
+                    bubble.innerText = msgData.text;
+                    messagesBox.appendChild(bubble);
+                });
+                // I-auto scroll sa pinaka-ubos para makita ang bag-ong chat
+                messagesBox.scrollTop = messagesBox.scrollHeight;
+            });
+        }
+
+        // SUBMIT AND SEND LOGIC LOOP
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const messageText = chatInput.value.trim();
+            if (!messageText || !chatRoomId || !currentUid) return;
+
+            try {
+                await addDoc(collection(db, "chats", chatRoomId, "messages"), {
+                    text: messageText,
+                    senderId: currentUid,
+                    timestamp: new Date().toISOString()
+                });
+                chatInput.value = ""; // Clear input field
+            } catch (err) {
+                console.error("Sending failed: ", err);
+            }
+        });
+    </script>
+</body>
+</html>
